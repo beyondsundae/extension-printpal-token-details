@@ -14,7 +14,27 @@
   overflow: hidden;
 }
 
+#pp-sr-box {
+  position: fixed;
+  right: 16px;
+  bottom: 320px;
+  width: 260px;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  background: linear-gradient(145deg, #0f172a, #1e293b);
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  z-index: 2147483647;
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+
 #pp-token-box.pp-hidden {
+  display: none;
+}
+
+#pp-sr-box.pp-hidden {
   display: none;
 }
 
@@ -36,6 +56,27 @@
 }
 
 #pp-token-toggle.pp-hidden {
+  display: none;
+}
+
+#pp-sr-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 64px;
+  padding: 8px 12px;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f9fafb;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  cursor: pointer;
+  z-index: 2147483647;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+#pp-sr-toggle.pp-hidden {
   display: none;
 }
 

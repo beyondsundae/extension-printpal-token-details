@@ -1,11 +1,18 @@
 (() => {
-  const ENDPOINT_SUBSTR = "/api/cad/check-generation-limit";
-
-  let lastUrl = "https://printpal.io/api/cad/check-generation-limit?input_modality=image";
+  const TOKEN_ENDPOINT = "/api/cad/check-generation-limit";
+  const SR_ENDPOINT = "/api/super-resolution/check-limits";
+  let lastTokenUrl = "https://printpal.io/api/cad/check-generation-limit?input_modality=image";
+  let lastSrUrl = "https://printpal.io/api/super-resolution/check-limits";
 
   function post(data, url) {
     try {
-      if (url) lastUrl = url;
+      if (url) {
+        if (url.includes(SR_ENDPOINT)) {
+          lastSrUrl = url;
+        } else if (url.includes(TOKEN_ENDPOINT)) {
+          lastTokenUrl = url;
+        }
+      }
       window.postMessage(
         {
           type: "PRINTPAL_TOKEN_DATA",
@@ -27,7 +34,11 @@
     const response = await originalFetch(...args);
     try {
       const reqUrl = args[0] && typeof args[0] === "string" ? args[0] : args[0]?.url;
-      if (reqUrl && reqUrl.includes(ENDPOINT_SUBSTR)) {
+      if (reqUrl && reqUrl.includes(TOKEN_ENDPOINT)) {
+        const cloned = response.clone();
+        const data = await cloned.json();
+        post(data, reqUrl);
+      } else if (reqUrl && reqUrl.includes(SR_ENDPOINT)) {
         const cloned = response.clone();
         const data = await cloned.json();
         post(data, reqUrl);
@@ -51,7 +62,7 @@
 
     xhr.addEventListener("load", () => {
       try {
-        if (requestUrl && requestUrl.includes(ENDPOINT_SUBSTR)) {
+        if (requestUrl && (requestUrl.includes(TOKEN_ENDPOINT) || requestUrl.includes(SR_ENDPOINT))) {
           const data = JSON.parse(xhr.responseText);
           post(data, requestUrl);
         }
@@ -67,11 +78,17 @@
 
   window.addEventListener("message", async (event) => {
     if (event.source !== window) return;
-    if (!event.data || event.data.type !== "PRINTPAL_TOKEN_REFRESH") return;
+    if (!event.data) return;
     try {
-      const res = await originalFetch(lastUrl, { credentials: "include" });
-      const data = await res.json();
-      post(data, lastUrl);
+      if (event.data.type === "PRINTPAL_TOKEN_REFRESH") {
+        const res = await originalFetch(lastTokenUrl, { credentials: "include" });
+        const data = await res.json();
+        post(data, lastTokenUrl);
+      } else if (event.data.type === "PRINTPAL_SR_REFRESH") {
+        const res = await originalFetch(lastSrUrl, { credentials: "include" });
+        const data = await res.json();
+        post(data, lastSrUrl);
+      }
     } catch (_) {
       // ignore refresh errors
     }

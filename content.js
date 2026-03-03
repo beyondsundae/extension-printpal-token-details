@@ -1,7 +1,10 @@
 (() => {
-  const ENDPOINT_SUBSTR = "/api/cad/check-generation-limit";
+  const TOKEN_ENDPOINT = "/api/cad/check-generation-limit";
+  const SR_ENDPOINT = "/api/super-resolution/check-limits";
   const BOX_ID = "pp-token-box";
   const TOGGLE_ID = "pp-token-toggle";
+  const SR_BOX_ID = "pp-sr-box";
+  const SR_TOGGLE_ID = "pp-sr-toggle";
 
   function inject() {
     const script = document.createElement("script");
@@ -87,6 +90,77 @@
     return box;
   }
 
+  function ensureSuperBox() {
+    let box = document.getElementById(SR_BOX_ID);
+    if (box) return box;
+
+    box = document.createElement("div");
+    box.id = SR_BOX_ID;
+    box.innerHTML = `
+      <div class="pp-token-header">
+        <div>
+          <div class="pp-token-title">Super Resolution</div>
+          <div class="pp-token-sub">Listening for limits…</div>
+        </div>
+        <div class="pp-token-actions">
+          <button class="pp-token-refresh" title="Refresh">⟳</button>
+          <button class="pp-token-close" title="Hide">×</button>
+        </div>
+      </div>
+      <div class="pp-token-body">
+        <div class="pp-token-row"><span>Remaining</span><strong id="pp-sr-remaining">-</strong></div>
+        <div class="pp-token-row"><span>Used</span><strong id="pp-sr-used">-</strong></div>
+        <div class="pp-token-row"><span>Limit</span><strong id="pp-sr-limit">-</strong></div>
+        <div class="pp-token-row"><span>Plan</span><strong id="pp-sr-plan">-</strong></div>
+        <div class="pp-token-row"><span>Can Use</span><strong id="pp-sr-can">-</strong></div>
+        <div class="pp-token-row"><span>Reset Date</span><strong id="pp-sr-reset">-</strong></div>
+        <div class="pp-token-row"><span>Reason</span><strong id="pp-sr-reason">-</strong></div>
+      </div>
+      <div class="pp-token-footer">
+        <span id="pp-sr-message">No data yet</span>
+      </div>
+    `;
+
+    document.documentElement.appendChild(box);
+
+    let toggle = document.getElementById(SR_TOGGLE_ID);
+    if (!toggle) {
+      toggle = document.createElement("button");
+      toggle.id = SR_TOGGLE_ID;
+      toggle.textContent = "Super Res";
+      toggle.title = "Show super resolution details";
+      toggle.classList.add("pp-hidden");
+      document.documentElement.appendChild(toggle);
+      toggle.addEventListener("click", () => {
+        box.classList.remove("pp-hidden");
+        toggle.classList.add("pp-hidden");
+        chrome.storage.local.set({ ppSrHidden: false });
+      });
+    }
+
+    const closeBtn = box.querySelector(".pp-token-close");
+    const refreshBtn = box.querySelector(".pp-token-refresh");
+    closeBtn.addEventListener("click", () => {
+      box.classList.add("pp-hidden");
+      toggle.classList.remove("pp-hidden");
+      chrome.storage.local.set({ ppSrHidden: true });
+    });
+    refreshBtn.addEventListener("click", () => {
+      window.postMessage({ type: "PRINTPAL_SR_REFRESH" }, "*");
+    });
+
+    chrome.storage.local.get(["ppSrHidden"], (res) => {
+      if (res.ppSrHidden) {
+        box.classList.add("pp-hidden");
+        toggle.classList.remove("pp-hidden");
+      } else {
+        toggle.classList.add("pp-hidden");
+      }
+    });
+
+    return box;
+  }
+
   function updateBox(payload) {
     const box = ensureBox();
     const remaining = payload.generations_limit - payload.generations_used;
@@ -118,15 +192,44 @@
     box.classList.remove("pp-hidden");
   }
 
+  function updateSuperBox(payload) {
+    const box = ensureSuperBox();
+    const remainingEl = box.querySelector("#pp-sr-remaining");
+    const usedEl = box.querySelector("#pp-sr-used");
+    const limitEl = box.querySelector("#pp-sr-limit");
+    const planEl = box.querySelector("#pp-sr-plan");
+    const canEl = box.querySelector("#pp-sr-can");
+    const resetEl = box.querySelector("#pp-sr-reset");
+    const reasonEl = box.querySelector("#pp-sr-reason");
+    const messageEl = box.querySelector("#pp-sr-message");
+    const subEl = box.querySelector(".pp-token-sub");
+
+    remainingEl.textContent = formatNumber(payload.remaining);
+    usedEl.textContent = formatNumber(payload.used);
+    limitEl.textContent = formatNumber(payload.limit);
+    planEl.textContent = payload.plan || "-";
+    canEl.textContent = payload.can_use ? "Yes" : "No";
+    resetEl.textContent = payload.reset_date || "-";
+    reasonEl.textContent = payload.reason || "-";
+    messageEl.textContent = payload.message || "Updated";
+    subEl.textContent = "Super resolution limit";
+
+    box.classList.remove("pp-hidden");
+  }
+
   window.addEventListener("message", (event) => {
     if (event.source !== window) return;
     const { type, url, data } = event.data || {};
     if (type !== "PRINTPAL_TOKEN_DATA") return;
-    if (!url || !url.includes(ENDPOINT_SUBSTR)) return;
     if (!data || typeof data !== "object") return;
 
-    if (data.success) {
+    if (url && url.includes(TOKEN_ENDPOINT) && data.success) {
       updateBox(data);
+      return;
+    }
+
+    if (url && url.includes(SR_ENDPOINT)) {
+      updateSuperBox(data);
     }
   });
 
@@ -134,4 +237,5 @@
   inject();
 
   ensureBox();
+  ensureSuperBox();
 })();
