@@ -1,0 +1,113 @@
+#pp-token-box {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 260px;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  background: linear-gradient(145deg, #111827, #1f2937);
+  color: #f9fafb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  z-index: 2147483647;
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+
+#pp-token-box.pp-hidden {
+  display: none;
+}
+
+#pp-token-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  padding: 8px 12px;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f9fafb;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  cursor: pointer;
+  z-index: 2147483647;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+#pp-token-toggle.pp-hidden {
+  display: none;
+}
+
+#pp-token-box .pp-token-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 14px 8px 14px;
+  gap: 8px;
+}
+
+#pp-token-box .pp-token-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+#pp-token-box .pp-token-sub {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+#pp-token-box .pp-token-close {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+#pp-token-box .pp-token-actions {
+  display: flex;
+  gap: 6px;
+}
+
+#pp-token-box .pp-token-refresh {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+#pp-token-box .pp-token-body {
+  padding: 4px 14px 10px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+#pp-token-box .pp-token-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+#pp-token-box .pp-token-row strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#pp-token-box .pp-token-footer {
+  padding: 8px 14px 12px 14px;
+  font-size: 11px;
+  color: #9ca3af;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}

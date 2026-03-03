@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Printpal Token Details",
+  "version": "1.0.0",
+  "description": "Shows remaining token details from Printpal generation limit endpoint.",
+  "content_scripts": [
+    {
+      "matches": ["https://printpal.io/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "host_permissions": ["https://printpal.io/*"],
+  "permissions": ["storage"],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["https://printpal.io/*"]
+    }
+  ]
+}
